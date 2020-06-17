@@ -26,9 +26,17 @@ import java.util.UUID;
 
 import win.lioil.bluetooth.APP;
 import win.lioil.bluetooth.R;
+import win.lioil.bluetooth.util.AssistStatic;
 
 /**
  * BLE服务端(从机/外围设备/peripheral)
+ * https://juejin.im/post/5cdbd083e51d453ce606dbd0
+ * 在蓝牙开发中，有些情况是不需要连接的，只要外设广播自己的数据即可，例如苹果的ibeacon。自Android 5.0更新蓝牙API后，手机可以作为外设广播数据。
+ * 广播包有两种：
+ * 广播包（Advertising Data）
+ * 响应包（Scan Response）
+ *
+ * 其中广播包是每个外设都必须广播的，而响应包是可选的。每个广播包的长度必须是31个字节，如果不到31个字节 ，则剩下的全用0填充 补全，这部分的数据是无效的
  */
 public class BleServerActivity extends Activity {
     public static final UUID UUID_SERVICE = UUID.fromString("0000180a-0000-1000-8000-00805f9b34fb"); //自定义UUID
@@ -53,7 +61,7 @@ public class BleServerActivity extends Activity {
         }
     };
 
-    // BLE服务端Callback
+    // BLE服务端Callback 定义Gat回调，当中心设备连接该手机外设后，修改特征值，读取特征值等情况，会得到相应的特征值回调
     private BluetoothGattServerCallback mBluetoothGattServerCallback = new BluetoothGattServerCallback() {
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
@@ -192,8 +200,9 @@ public class BleServerActivity extends Activity {
 
         // 注意：必须要开启可连接的BLE广播，其它设备才能发现并连接BLE服务端!
         // =============启动BLE蓝牙服务端=====================================================================================
+        //SERVICE_TYPE_PRIMARY 主服务 SERVICE_TYPE_SECONDARY 次服务（存在主服务中）
         BluetoothGattService service = new BluetoothGattService(UUID_SERVICE, BluetoothGattService.SERVICE_TYPE_PRIMARY);
-        //添加可读+通知characteristic
+        //添加可读+通知 characteristic，通过characteristic进行读写操作来通信 特征值支持写，支持读，支持通知
         BluetoothGattCharacteristic characteristicRead = new BluetoothGattCharacteristic(UUID_CHAR_READ_NOTIFY,
                 BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY, BluetoothGattCharacteristic.PERMISSION_READ);
         characteristicRead.addDescriptor(new BluetoothGattDescriptor(UUID_DESC_NOTITY, BluetoothGattCharacteristic.PERMISSION_WRITE));
@@ -204,13 +213,19 @@ public class BleServerActivity extends Activity {
         service.addCharacteristic(characteristicWrite);
         if (bluetoothManager != null)
             mBluetoothGattServer = bluetoothManager.openGattServer(this, mBluetoothGattServerCallback);
-        mBluetoothGattServer.addService(service);
+        boolean result = mBluetoothGattServer.addService(service);
+        if (result) {
+            AssistStatic.showToast(BleServerActivity.this, "添加服务成功");
+        } else {
+            AssistStatic.showToast(BleServerActivity.this, "添加服务失败");
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mBluetoothLeAdvertiser != null)
+            //停止广播
             mBluetoothLeAdvertiser.stopAdvertising(mAdvertiseCallback);
         if (mBluetoothGattServer != null)
             mBluetoothGattServer.close();
