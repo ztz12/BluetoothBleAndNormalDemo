@@ -428,6 +428,43 @@ public class BleClientActivity extends Activity {
         }
     }
 
+    /**
+     * 读取特征值，会回调onCharacteristicRead方法
+     * Request a read on a given {@code BluetoothGattCharacteristic}. The read result is reported
+     * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
+     * callback.
+     *
+     * @param characteristic The characteristic to read from.
+     */
+    public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
+        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+            Log.w(TAG, " --------- BluetoothAdapter not initialized --------- ");
+            return;
+        }
+        mBluetoothGatt.readCharacteristic(characteristic);
+    }
+
+    /**
+     * Enables or disables notification on a give characteristic.
+     *
+     * @param characteristic Characteristic to act on.
+     * @param enabled        If true, enable notification.  False otherwise.
+     */
+    public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic,
+                                              boolean enabled) {
+        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+            Log.w(TAG, " --------- BluetoothAdapter not initialized --------- ");
+            return;
+        }
+        boolean isSuccess = mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+        if (isSuccess) {
+            Log.d(TAG, " --------- setCharacteristicNotification --------- Success");
+        } else {
+            Log.d(TAG, " --------- setCharacteristicNotification --------- Fail");
+        }
+
+    }
+
 //    /**
 //     * 根据服务UUID和特征UUID,获取一个特征{@link BluetoothGattCharacteristic}
 //     *
@@ -486,40 +523,4 @@ public class BleClientActivity extends Activity {
 //        }
 //    }
 
-    /**
-     * 读取特征值，会回调onCharacteristicRead方法
-     * Request a read on a given {@code BluetoothGattCharacteristic}. The read result is reported
-     * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
-     * callback.
-     *
-     * @param characteristic The characteristic to read from.
-     */
-    public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, " --------- BluetoothAdapter not initialized --------- ");
-            return;
-        }
-        mBluetoothGatt.readCharacteristic(characteristic);
-    }
-
-    /**
-     * Enables or disables notification on a give characteristic.
-     *
-     * @param characteristic Characteristic to act on.
-     * @param enabled        If true, enable notification.  False otherwise.
-     */
-    public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic,
-                                              boolean enabled) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, " --------- BluetoothAdapter not initialized --------- ");
-            return;
-        }
-        boolean isSuccess = mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
-        if (isSuccess) {
-            Log.d(TAG, " --------- setCharacteristicNotification --------- Success");
-        } else {
-            Log.d(TAG, " --------- setCharacteristicNotification --------- Fail");
-        }
-
-    }
 }

@@ -61,15 +61,16 @@ public class Utils {
 
     /**
      * 将字节数组转换为16进制字符串
+     *
      * @param bytes
-     * @return  01FE0835F1000000000000000000000000000000
+     * @return 01FE0835F1000000000000000000000000000000
      */
     public static String bytes2HexStr(byte[] bytes) {
         if (bytes == null) {
             return null;
         }
         StringBuilder b = new StringBuilder();
-        for (int i = 0; i<bytes.length; i++) {
+        for (int i = 0; i < bytes.length; i++) {
             b.append(String.format("%02x", bytes[i] & 0xFF));
         }
         return b.toString();
