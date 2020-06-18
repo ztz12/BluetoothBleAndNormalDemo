@@ -29,13 +29,13 @@ import win.lioil.bluetooth.R;
 import win.lioil.bluetooth.util.AssistStatic;
 
 /**
+ * 手机作为服务端，连接的设备作为客户端
  * BLE服务端(从机/外围设备/peripheral)
  * https://juejin.im/post/5cdbd083e51d453ce606dbd0
  * 在蓝牙开发中，有些情况是不需要连接的，只要外设广播自己的数据即可，例如苹果的ibeacon。自Android 5.0更新蓝牙API后，手机可以作为外设广播数据。
  * 广播包有两种：
  * 广播包（Advertising Data）
  * 响应包（Scan Response）
- *
  * 其中广播包是每个外设都必须广播的，而响应包是可选的。每个广播包的长度必须是31个字节，如果不到31个字节 ，则剩下的全用0填充 补全，这部分的数据是无效的
  */
 public class BleServerActivity extends Activity {
@@ -61,7 +61,7 @@ public class BleServerActivity extends Activity {
         }
     };
 
-    // BLE服务端Callback 定义Gat回调，当中心设备连接该手机外设后，修改特征值，读取特征值等情况，会得到相应的特征值回调
+    // BLE服务端Callback 定义Gat回调，当中心设备连接该手机外设后，中心设备修改特征值，手机端读取特征值等情况，会得到相应的特征值回调
     private BluetoothGattServerCallback mBluetoothGattServerCallback = new BluetoothGattServerCallback() {
         @Override
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
@@ -196,7 +196,16 @@ public class BleServerActivity extends Activity {
 //                .addServiceData(new ParcelUuid(UUID_SERVICE), new byte[]{2}) //服务数据，自定义
                 .build();
         mBluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
-        mBluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponse, mAdvertiseCallback);
+        if (bluetoothAdapter.isEnabled()) {
+            if (mBluetoothLeAdvertiser != null) {
+                //开启广播
+                mBluetoothLeAdvertiser.startAdvertising(settings, advertiseData, scanResponse, mAdvertiseCallback);
+            } else {
+                Log.d("yif", "该手机不支持ble广播");
+            }
+        } else {
+            Log.d("yif", "手机蓝牙未开启");
+        }
 
         // 注意：必须要开启可连接的BLE广播，其它设备才能发现并连接BLE服务端!
         // =============启动BLE蓝牙服务端=====================================================================================

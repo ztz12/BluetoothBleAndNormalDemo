@@ -329,16 +329,10 @@ public class BleClientActivity extends Activity {
         if (service != null) {
             // 设置Characteristic通知
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(BleServerActivity.UUID_CHAR_READ_NOTIFY);//通过UUID获取可通知的Characteristic
-//            mBluetoothGatt.setCharacteristicNotification(characteristic, true);
             final int charaProp = characteristic.getProperties();
-            if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
-                // If there is an active notification on a characteristic, clear
-                // it first so it doesn't update the data field on the user interface.
-                mBluetoothGatt.setCharacteristicNotification(characteristic, true);
-                readCharacteristic(characteristic);
-            }
             if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
                 mBluetoothGatt.setCharacteristicNotification(characteristic, true);
+                readCharacteristic(characteristic);
             }
 
             // 向Characteristic的Descriptor属性写入通知开关，使蓝牙设备主动向手机发送数据
@@ -436,6 +430,7 @@ public class BleClientActivity extends Activity {
         if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
             // If there is an active notification on a characteristic, clear
             // it first so it doesn't update the data field on the user interface.
+            //有活的特征通知，先清除，赋值为空，在重新设置通知获取
             if (mNotifyCharacteristic1 != null) {
                 setCharacteristicNotification(
                         mNotifyCharacteristic1, false);
