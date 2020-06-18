@@ -36,6 +36,7 @@ import java.util.UUID;
 import win.lioil.bluetooth.APP;
 import win.lioil.bluetooth.R;
 import win.lioil.bluetooth.util.AssistStatic;
+import win.lioil.bluetooth.util.Util;
 import win.lioil.bluetooth.util.Utils;
 
 /**
@@ -45,6 +46,9 @@ import win.lioil.bluetooth.util.Utils;
  * 一个BLE设备可以拥有多个Service，一个Service可以包含多个Characteristic， 一个Characteristic包含一个Value和多个Descriptor，
  * 一个Descriptor包含一个Value。 通信数据一般存储在Characteristic内，目前一个Characteristic中存储的数据最大为20 byte。
  * 与Characteristic相关的权限字段主要有READ、WRITE、WRITE_NO_RESPONSE、NOTIFY。 Characteristic具有的权限属性可以有一个或者多个。
+ * BLE4.0蓝牙发送数据，单次最大传输20个byte,如果是一般的协议命令，如：开关灯、前进左右等等，是不需要
+ * 分包的，如果是需要发送如：图片、BIN文档、音乐等大数据量的文件，则必须进行分包发送，BLE库中已经提
+ * 供了发送大数据包的接口。
  */
 public class BleClientActivity extends Activity {
     private static final String TAG = BleClientActivity.class.getSimpleName();
@@ -54,16 +58,17 @@ public class BleClientActivity extends Activity {
     private BluetoothGatt mBluetoothGatt;
     private boolean isConnected = false;
     private BluetoothAdapter mBluetoothAdapter;
-    private HashMap<String, Map<String, BluetoothGattCharacteristic>> servicesMap = new HashMap<>();
+    //    private HashMap<String, Map<String, BluetoothGattCharacteristic>> servicesMap = new HashMap<>();
     private BluetoothGattCharacteristic mNotifyCharacteristic1;
     //根据具体硬件进行设置
-    public static String DEVICEA_UUID_SERVICE = "000001801-0000-1000-8000-00805f9b34fb";
-    public static String DEVICEA_UUID_CHARACTERISTIC = "00002a05-0000-1000-8000-00805f9b34fb";
-    //一般不用修改
-    public static String DEVICEA_UUID_DESCRIPTOR = "00002902-0000-1000-8000-00805f9b34fb";
+//    public static String DEVICEA_UUID_SERVICE = "000001801-0000-1000-8000-00805f9b34fb";
+//    public static String DEVICEA_UUID_CHARACTERISTIC = "00002a05-0000-1000-8000-00805f9b34fb";
+//    //一般不用修改
+//    public static String DEVICEA_UUID_DESCRIPTOR = "00002902-0000-1000-8000-00805f9b34fb";
 
     public Queue<byte[]> dataInfoQueue = new LinkedList<>();
     private StringBuilder mBuilder;
+    private final Object locker = new Object();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -208,8 +213,9 @@ public class BleClientActivity extends Activity {
                 dataInfoQueue = Utils.splitPacketFor20Byte(value);
             }
             getBlueData();
+            String info = String.format("value: %s%s", "(0x)", Utils.bytes2HexStr(characteristic.getValue()));
             String returnedPacket = mBuilder.toString().replace(" ", "");
-            logTv("读取Characteristic[" + uuid + "]:\n" + returnedPacket);
+            logTv("读取Characteristic[" + uuid + "]:\n" + info);
             Log.i(TAG, String.format("onCharacteristicRead:%s,%s,%s,%s,%s", gatt.getDevice().getName(), gatt.getDevice().getAddress(), uuid, returnedPacket, status));
         }
 
@@ -222,10 +228,12 @@ public class BleClientActivity extends Activity {
          */
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            UUID uuid = characteristic.getUuid();
-            String valueStr = new String(characteristic.getValue());
-            Log.i(TAG, String.format("onCharacteristicWrite:%s,%s,%s,%s,%s", gatt.getDevice().getName(), gatt.getDevice().getAddress(), uuid, valueStr, status));
-            logTv("写入Characteristic[" + uuid + "]:\n" + valueStr);
+            synchronized (locker) {
+                UUID uuid = characteristic.getUuid();
+                String valueStr = new String(characteristic.getValue());
+                Log.i(TAG, String.format("onCharacteristicWrite:%s,%s,%s,%s,%s", gatt.getDevice().getName(), gatt.getDevice().getAddress(), uuid, valueStr, status));
+                logTv("写入Characteristic[" + uuid + "]:\n" + valueStr);
+            }
         }
 
         /*
@@ -239,15 +247,19 @@ public class BleClientActivity extends Activity {
          * */
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            UUID uuid = characteristic.getUuid();
-            byte[] value = characteristic.getValue();
-            StringBuilder stringBuilder = new StringBuilder();
-            for (byte byteChar : value) {
-                stringBuilder.append(String.format("%d ", byteChar));
+            synchronized (locker) {
+                UUID uuid = characteristic.getUuid();
+                byte[] value = characteristic.getValue();
+                if (dataInfoQueue != null) {
+                    dataInfoQueue.clear();
+                    mBuilder = new StringBuilder();
+                    dataInfoQueue = Utils.splitPacketFor20Byte(value);
+                }
+                getBlueData();
+                String info = String.format("value: %s%s", "(0x)", Utils.bytes2HexStr(characteristic.getValue()));
+                String returnedPacket = mBuilder.toString().replace(" ", "");
+                logTv("通知Characteristic[" + uuid + "]:\n" + info);
             }
-            String returnedPacket = stringBuilder.toString().replace(" ", "");
-            Log.i(TAG, String.format("onCharacteristicChanged:%s,%s,%s,%s", gatt.getDevice().getName(), gatt.getDevice().getAddress(), uuid, returnedPacket));
-            logTv("通知Characteristic[" + uuid + "]:\n" + returnedPacket);
         }
 
         @Override
@@ -262,11 +274,13 @@ public class BleClientActivity extends Activity {
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            if (descriptor != null) {
-                UUID uuid = descriptor.getUuid();
-                String valueStr = Arrays.toString(descriptor.getValue());
-                Log.i(TAG, String.format("onDescriptorWrite:%s,%s,%s,%s,%s", gatt.getDevice().getName(), gatt.getDevice().getAddress(), uuid, valueStr, status));
-                logTv("写入Descriptor[" + uuid + "]:\n" + valueStr);
+            synchronized (locker) {
+                if (descriptor != null) {
+                    UUID uuid = descriptor.getUuid();
+                    String valueStr = Arrays.toString(descriptor.getValue());
+                    Log.i(TAG, String.format("onDescriptorWrite:%s,%s,%s,%s,%s", gatt.getDevice().getName(), gatt.getDevice().getAddress(), uuid, valueStr, status));
+                    logTv("写入Descriptor[" + uuid + "]:\n" + valueStr);
+                }
             }
         }
     };
@@ -329,19 +343,46 @@ public class BleClientActivity extends Activity {
         if (service != null) {
             // 设置Characteristic通知
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(BleServerActivity.UUID_CHAR_READ_NOTIFY);//通过UUID获取可通知的Characteristic
-            final int charaProp = characteristic.getProperties();
-            if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
-                mBluetoothGatt.setCharacteristicNotification(characteristic, true);
-                readCharacteristic(characteristic);
+
+            if (characteristic.getDescriptors().size() > 0) {
+                //Filter descriptors based on the uuid of the descriptor
+                List<BluetoothGattDescriptor> descriptors = characteristic.getDescriptors();
+                for (BluetoothGattDescriptor descriptor : descriptors) {
+                    if (descriptor != null) {
+                        //Write the description value
+                        if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
+                            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                        } else if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
+                            //两个都是通知的意思，notify和indication的区别在于，notify只是将你要发的数据发送给手机，没有确认机制，
+                            //不会保证数据发送是否到达。而indication的方式在手机收到数据时会主动回一个ack回来。即有确认机制，只有收
+                            //到这个ack你才能继续发送下一个数据。这保证了数据的正确到达，也起到了流控的作用。所以在打开通知的时候，需要设置一下。
+                            descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);
+                        }
+                        mBluetoothGatt.writeDescriptor(descriptor);
+                    }
+                }
             }
 
-            // 向Characteristic的Descriptor属性写入通知开关，使蓝牙设备主动向手机发送数据
-            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(BleServerActivity.UUID_DESC_NOTITY);
-            // descriptor.setValue(BluetoothGattDescriptor.ENABLE_INDICATION_VALUE);//和通知类似,但服务端不主动发数据,只指示客户端读取数据
-            if (descriptor != null) {
-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                mBluetoothGatt.writeDescriptor(descriptor);
+            //设置通知方式放在处理描述符后面，否则设置通知无法回调 onCharacteristicChanged 方法，放在描述符之前，调用readCharacteristic会直接调用
+            //onCharacteristicRead 而不调用onCharacteristicChanged
+            final int charaProp = characteristic.getProperties();
+            if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
+                // If there is an active notification on a characteristic, clear
+                // it first so it doesn't update the data field on the user interface.
+                //有活的特征通知，先清除，赋值为空，在重新设置通知获取
+                if (mNotifyCharacteristic1 != null) {
+                    setCharacteristicNotification(
+                            mNotifyCharacteristic1, false);
+                    mNotifyCharacteristic1 = null;
+                }
+                readCharacteristic(characteristic);
             }
+            if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                mNotifyCharacteristic1 = characteristic;
+                setCharacteristicNotification(
+                        characteristic, true);
+            }
+
         }
     }
 
@@ -387,63 +428,63 @@ public class BleClientActivity extends Activity {
         }
     }
 
-    /**
-     * 根据服务UUID和特征UUID,获取一个特征{@link BluetoothGattCharacteristic}
-     *
-     * @param serviceUUID   服务UUID
-     * @param characterUUID 特征UUID
-     */
-    private BluetoothGattCharacteristic getBluetoothGattCharacteristic(String serviceUUID, String characterUUID) {
-        if (null == mBluetoothGatt) {
-            Log.e(TAG, "mBluetoothGatt is null");
-            return null;
-        }
-
-        //找服务
-        Map<String, BluetoothGattCharacteristic> bluetoothGattCharacteristicMap = servicesMap.get(serviceUUID);
-        if (null == bluetoothGattCharacteristicMap) {
-            Log.e(TAG, "Not found the serviceUUID!");
-            return null;
-        }
-
-        //找特征
-        Set<Map.Entry<String, BluetoothGattCharacteristic>> entries = bluetoothGattCharacteristicMap.entrySet();
-        BluetoothGattCharacteristic gattCharacteristic = null;
-        for (Map.Entry<String, BluetoothGattCharacteristic> entry : entries) {
-            if (characterUUID.equals(entry.getKey())) {
-                gattCharacteristic = entry.getValue();
-                break;
-            }
-        }
-        return gattCharacteristic;
-    }
-
-
-    private void enableGattServicesNotification(BluetoothGattCharacteristic gattCharacteristic) {
-        if (gattCharacteristic == null) return;
-        setNotify(gattCharacteristic);
-    }
-
-    private void setNotify(BluetoothGattCharacteristic characteristic) {
-
-        final int charaProp = characteristic.getProperties();
-        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
-            // If there is an active notification on a characteristic, clear
-            // it first so it doesn't update the data field on the user interface.
-            //有活的特征通知，先清除，赋值为空，在重新设置通知获取
-            if (mNotifyCharacteristic1 != null) {
-                setCharacteristicNotification(
-                        mNotifyCharacteristic1, false);
-                mNotifyCharacteristic1 = null;
-            }
-            readCharacteristic(characteristic);
-        }
-        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
-            mNotifyCharacteristic1 = characteristic;
-            setCharacteristicNotification(
-                    characteristic, true);
-        }
-    }
+//    /**
+//     * 根据服务UUID和特征UUID,获取一个特征{@link BluetoothGattCharacteristic}
+//     *
+//     * @param serviceUUID   服务UUID
+//     * @param characterUUID 特征UUID
+//     */
+//    private BluetoothGattCharacteristic getBluetoothGattCharacteristic(String serviceUUID, String characterUUID) {
+//        if (null == mBluetoothGatt) {
+//            Log.e(TAG, "mBluetoothGatt is null");
+//            return null;
+//        }
+//
+//        //找服务
+//        Map<String, BluetoothGattCharacteristic> bluetoothGattCharacteristicMap = servicesMap.get(serviceUUID);
+//        if (null == bluetoothGattCharacteristicMap) {
+//            Log.e(TAG, "Not found the serviceUUID!");
+//            return null;
+//        }
+//
+//        //找特征
+//        Set<Map.Entry<String, BluetoothGattCharacteristic>> entries = bluetoothGattCharacteristicMap.entrySet();
+//        BluetoothGattCharacteristic gattCharacteristic = null;
+//        for (Map.Entry<String, BluetoothGattCharacteristic> entry : entries) {
+//            if (characterUUID.equals(entry.getKey())) {
+//                gattCharacteristic = entry.getValue();
+//                break;
+//            }
+//        }
+//        return gattCharacteristic;
+//    }
+//
+//
+//    private void enableGattServicesNotification(BluetoothGattCharacteristic gattCharacteristic) {
+//        if (gattCharacteristic == null) return;
+//        setNotify(gattCharacteristic);
+//    }
+//
+//    private void setNotify(BluetoothGattCharacteristic characteristic) {
+//
+//        final int charaProp = characteristic.getProperties();
+//        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
+//            // If there is an active notification on a characteristic, clear
+//            // it first so it doesn't update the data field on the user interface.
+//            //有活的特征通知，先清除，赋值为空，在重新设置通知获取
+//            if (mNotifyCharacteristic1 != null) {
+//                setCharacteristicNotification(
+//                        mNotifyCharacteristic1, false);
+//                mNotifyCharacteristic1 = null;
+//            }
+//            readCharacteristic(characteristic);
+//        }
+//        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+//            mNotifyCharacteristic1 = characteristic;
+//            setCharacteristicNotification(
+//                    characteristic, true);
+//        }
+//    }
 
     /**
      * 读取特征值，会回调onCharacteristicRead方法
@@ -473,14 +514,12 @@ public class BleClientActivity extends Activity {
             Log.w(TAG, " --------- BluetoothAdapter not initialized --------- ");
             return;
         }
-        mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
-
-        if (DEVICEA_UUID_CHARACTERISTIC.equals(characteristic.getUuid().toString())) {
-            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                    UUID.fromString(DEVICEA_UUID_DESCRIPTOR));
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            mBluetoothGatt.writeDescriptor(descriptor);
-            Log.d(TAG, " --------- Connect setCharacteristicNotification --------- " + characteristic.getUuid());
+        boolean isSuccess = mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+        if (isSuccess) {
+            Log.d(TAG, " --------- setCharacteristicNotification --------- Success");
+        } else {
+            Log.d(TAG, " --------- setCharacteristicNotification --------- Fail");
         }
+
     }
 }

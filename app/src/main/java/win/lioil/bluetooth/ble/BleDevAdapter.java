@@ -4,9 +4,12 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.os.Build;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -77,9 +80,20 @@ public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
             if(mListener!=null){
                 mListener.onScanning();
             }
+//            final ScanSettings scanSettings = new ScanSettings.Builder()
+//                    //Android8.0以上退到后台息屏后，为了保证省电等原因，如果不设置ScanFilters的话是默认扫不到设备的，
+//                    //退居到后台设置扫描模式为低功耗
+//                    .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+//                    .build();
+//            final List<ScanFilter> filters = new ArrayList<>();
+//            filters.add(new ScanFilter.Builder()
+//                    //过滤扫描蓝牙设备的主服务，只扫描包含当前服务的设备
+//                    .setServiceUuid(ParcelUuid.fromString("0000180a-0000-1000-8000-00805f9b34fb"))
+//                    .build());
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+//                    bluetoothLeScanner.startScan(filters,scanSettings,mScanCallback);
                     // Android5.0新增的扫描API，扫描返回的结果更友好，比如BLE广播数据以前是byte[] scanRecord，而新API帮我们解析成ScanRecord类
                     bluetoothLeScanner.startScan(mScanCallback);
                     mHandler.postDelayed(new Runnable() {

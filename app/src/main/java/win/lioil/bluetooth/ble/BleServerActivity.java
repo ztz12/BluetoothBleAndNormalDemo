@@ -39,8 +39,8 @@ import win.lioil.bluetooth.util.AssistStatic;
  * 其中广播包是每个外设都必须广播的，而响应包是可选的。每个广播包的长度必须是31个字节，如果不到31个字节 ，则剩下的全用0填充 补全，这部分的数据是无效的
  */
 public class BleServerActivity extends Activity {
-    public static final UUID UUID_SERVICE = UUID.fromString("0000180a-0000-1000-8000-00805f9b34fb"); //自定义UUID
-    public static final UUID UUID_CHAR_READ_NOTIFY = UUID.fromString("00002a29-0000-1000-8000-00805f9b34fb");
+    public static final UUID UUID_SERVICE = UUID.fromString("3ab10100-f831-4395-b29d-570977d5bf94"); //自定义UUID
+    public static final UUID UUID_CHAR_READ_NOTIFY = UUID.fromString("3ab10101-f831-4395-b29d-570977d5bf94");
     public static final UUID UUID_DESC_NOTITY = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
     public static final UUID UUID_CHAR_WRITE = UUID.fromString("12000000-0000-0000-0000-000000000000");
     private static final String TAG = BleServerActivity.class.getSimpleName();
