@@ -13,7 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="reScan"
-        android:text="@string/reScan" />
+        android:text="@string/reScan"
+        android:layout_margin="5dp"
+        android:background="@drawable/selector_get_verification_btn"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_ble"
