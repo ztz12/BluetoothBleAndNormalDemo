@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -449,6 +450,16 @@ public class BleClientDetailActivity extends AppCompatActivity {
             Log.d(TAG, " --------- setCharacteristicNotification --------- Fail");
         }
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:// 点击返回图标事件
+                this.finish();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 //    /**
