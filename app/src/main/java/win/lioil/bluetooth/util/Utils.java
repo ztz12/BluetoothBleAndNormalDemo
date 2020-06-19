@@ -15,6 +15,72 @@ import java.util.Queue;
 
 public class Utils {
 
+    //UUID含义是通用唯一识别码 (Universally Unique Identifier)，这 是一个软件建构的标准，也是被开源软件基金会 (Open Software Foundation, OSF)
+    // 的组织应用在分布式计算环境 (Distributed Computing Environment, DCE) 领域的一部分。它保证对在同一时空中的所有机器都是唯一的。通常平台会提供生成的API。
+    // 按照开放软件基金会(OSF)制定的标准计算，用到了以太网卡地址、纳秒级时间、芯片ID码和许多可能的数字
+    //UUID 的目的，是让分布式系统中的所有元素，都能有唯一的辨识资讯，而不需要透过中央控制端来做辨识资讯的指定。如此一来，每个人都可以建立不与其它人冲突的 UUID。
+    //总结起来就是，UUID是根据一定算法，计算得到的一长串数字，这个数字的产生使用了多种元素，所以使得这串数字不会重复，每次生成都会产生不一样的序列，所以可以用来作为唯一标识。
+    private static final String base_uuid_regex = "0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb";
+
+    //机器设备配置信息基础服务UUID以0000开头，后面几组数字固定
+    public static boolean isBaseUUID(String uuid) {
+        return uuid.toLowerCase().matches("0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb");
+    }
+
+    /**
+     * 16bit和32bit的UUID与128bit的值之间转换关系：
+     * 128_bit_UUID = 16_bit_UUID * 2^96 + Bluetooth_Base_UUID
+     * 128_bit_UUID = 32_bit_UUID * 2^96 + Bluetooth_Base_UUID
+     *
+     * 其中 Bluetooth_Base_UUID定义为 00000000-0000-1000-8000-00805F9B34FB
+     *
+     * 若16 bit UUID为xxxx，那么128 bit UUID为0000xxxx-0000-1000-8000-00805F9B34FB
+     * 若32 bit UUID为xxxxxxxx，那么128 bit UUID为xxxxxxxx-0000-1000-8000-00805F9B34FB
+     */
+    public static String uuid128To16(String uuid) {
+        return uuid128To16(uuid, true);
+    }
+
+    /**
+     * 将128bit UUID 转换成16bit UUID
+     * @param uuid
+     * @param lower_case
+     * @return
+     */
+    public static String uuid128To16(String uuid, boolean lower_case) {
+        String uuid_16 = "";
+        if (uuid.length() == 36) {
+            if (lower_case) {
+                uuid_16 = uuid.substring(4, 8).toLowerCase();
+            }else {
+                uuid_16 = uuid.substring(4, 8).toUpperCase();
+            }
+            return uuid_16;
+        }
+        return null;
+    }
+
+    public static String uuid16To128(String uuid) {
+        return uuid16To128(uuid, true);
+    }
+
+    /**
+     * 将16bit UUID 转换成128bit UUID
+     * @param uuid
+     * @param lower_case
+     * @return
+     */
+    public static String uuid16To128(String uuid, boolean lower_case) {
+        String uuid_128 = "";
+        if (lower_case) {
+            uuid_128 = ("0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb".substring(0, 4) + uuid + "0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb".substring(38)).toLowerCase();
+        }else {
+            uuid_128 = ("0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb".substring(0, 4) + uuid + "0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb".substring(38)).toUpperCase();
+        }
+        return uuid_128;
+    }
+
+
     //inputstream转byte[]
     public static byte[] stream2Bytes(InputStream input) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
