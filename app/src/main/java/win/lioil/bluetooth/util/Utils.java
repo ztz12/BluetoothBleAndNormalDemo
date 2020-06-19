@@ -31,9 +31,9 @@ public class Utils {
      * 16bit和32bit的UUID与128bit的值之间转换关系：
      * 128_bit_UUID = 16_bit_UUID * 2^96 + Bluetooth_Base_UUID
      * 128_bit_UUID = 32_bit_UUID * 2^96 + Bluetooth_Base_UUID
-     *
+     * <p>
      * 其中 Bluetooth_Base_UUID定义为 00000000-0000-1000-8000-00805F9B34FB
-     *
+     * <p>
      * 若16 bit UUID为xxxx，那么128 bit UUID为0000xxxx-0000-1000-8000-00805F9B34FB
      * 若32 bit UUID为xxxxxxxx，那么128 bit UUID为xxxxxxxx-0000-1000-8000-00805F9B34FB
      */
@@ -43,6 +43,7 @@ public class Utils {
 
     /**
      * 将128bit UUID 转换成16bit UUID
+     *
      * @param uuid
      * @param lower_case
      * @return
@@ -52,7 +53,7 @@ public class Utils {
         if (uuid.length() == 36) {
             if (lower_case) {
                 uuid_16 = uuid.substring(4, 8).toLowerCase();
-            }else {
+            } else {
                 uuid_16 = uuid.substring(4, 8).toUpperCase();
             }
             return uuid_16;
@@ -66,6 +67,7 @@ public class Utils {
 
     /**
      * 将16bit UUID 转换成128bit UUID
+     *
      * @param uuid
      * @param lower_case
      * @return
@@ -74,7 +76,7 @@ public class Utils {
         String uuid_128 = "";
         if (lower_case) {
             uuid_128 = ("0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb".substring(0, 4) + uuid + "0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb".substring(38)).toLowerCase();
-        }else {
+        } else {
             uuid_128 = ("0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb".substring(0, 4) + uuid + "0000([0-9a-f][0-9a-f][0-9a-f][0-9a-f])-0000-1000-8000-00805f9b34fb".substring(38)).toUpperCase();
         }
         return uuid_128;
