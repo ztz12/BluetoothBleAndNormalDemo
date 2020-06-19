@@ -52,7 +52,7 @@ public class BleClientDetailActivity extends AppCompatActivity {
     private StringBuilder mBuilder;
     private final Object locker = new Object();
     public static final String EXTRA_TAG = "device";
-    private ActionBar actionBar;
+    private TextView tvProperties;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +79,8 @@ public class BleClientDetailActivity extends AppCompatActivity {
         btnWrite = findViewById(R.id.btn_write);
         btnRead = findViewById(R.id.btn_read);
         btnNotify = findViewById(R.id.btn_notify);
-        actionBar = getSupportActionBar();
+        tvProperties = findViewById(R.id.tv_properties);
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("详情信息");
         actionBar.setDisplayHomeAsUpEnabled(true);
     }
@@ -358,7 +359,7 @@ public class BleClientDetailActivity extends AppCompatActivity {
                 setCharacteristicNotification(
                         characteristic, true);
             }
-
+            appearButton();
         }
     }
 
@@ -392,6 +393,7 @@ public class BleClientDetailActivity extends AppCompatActivity {
             }
             if (builder.length() > 0) {
                 builder.deleteCharAt(builder.length() - 1);
+                tvProperties.setText(String.format("Properties: %s", builder.toString()));
             }
         }
     }

@@ -6,15 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ble.BleClientDetailActivity">
 
-    <TextView
-        android:id="@+id/tv_properties"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:textColor="@color/colorPrimary"
-        android:textSize="16sp"
-        android:visibility="gone"/>
 
     <Button
         android:id="@+id/btn_read"
@@ -67,8 +58,16 @@
         app:layout_constraintStart_toEndOf="@+id/et_write"
         app:layout_constraintTop_toBottomOf="@+id/btn_write" />
 
-    <ScrollView
-        android:layout_width="0dp"
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_properties"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@+id/btn_clear"/>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_marginTop="25dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@drawable/stroke"
         android:padding="2dp"
@@ -82,6 +81,6 @@
             android:id="@+id/tv_tips"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-    </ScrollView>
+    </android.support.v4.widget.NestedScrollView>
 
 </android.support.constraint.ConstraintLayout>
