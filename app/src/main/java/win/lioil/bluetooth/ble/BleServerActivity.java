@@ -217,7 +217,7 @@ public class BleServerActivity extends Activity {
         characteristicRead.addDescriptor(new BluetoothGattDescriptor(UUID_DESC_NOTITY, BluetoothGattCharacteristic.PERMISSION_WRITE));
         service.addCharacteristic(characteristicRead);
         //添加可写characteristic
-        BluetoothGattCharacteristic characteristicWrite = new BluetoothGattCharacteristic(UUID_CHAR_WRITE,
+        BluetoothGattCharacteristic characteristicWrite = new BluetoothGattCharacteristic(UUID_CHAR_READ_NOTIFY,
                 BluetoothGattCharacteristic.PROPERTY_WRITE, BluetoothGattCharacteristic.PERMISSION_WRITE);
         service.addCharacteristic(characteristicWrite);
         if (bluetoothManager != null)

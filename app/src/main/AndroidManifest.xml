@@ -4,15 +4,10 @@
     package="win.lioil.bluetooth">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!--建立蓝牙连接和传输权限-->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <!--扫描蓝牙设备或修改蓝牙设置权限-->
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <!--Android 6.0及后续版本扫描蓝牙,需要定位权限(进入GPS设置,可以看到蓝牙定位)-->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- required = true 表示手机必须支持BLE，否则无法安装运行-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- 建立蓝牙连接和传输权限 -->
+    <uses-permission android:name="android.permission.BLUETOOTH" /> <!-- 扫描蓝牙设备或修改蓝牙设置权限 -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- Android 6.0及后续版本扫描蓝牙,需要定位权限(进入GPS设置,可以看到蓝牙定位) -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- required = true 表示手机必须支持BLE，否则无法安装运行 -->
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="false" />
@@ -27,8 +22,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".ble.BleClientDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,29 +34,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".bt.BtClientActivity"
             android:label="@string/bt_client"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".bt.BtServerActivity"
             android:label="@string/bt_server"
-            android:windowSoftInputMode="stateAlwaysHidden"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".ble.BleClientActivity"
             android:label="@string/ble_client"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ble.BleServerActivity"
             android:label="@string/ble_server"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
