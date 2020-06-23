@@ -12,7 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import win.lioil.bluetooth.APP;
+import win.lioil.bluetooth.app.APP;
 import win.lioil.bluetooth.R;
 import win.lioil.bluetooth.util.AssistStatic;
 

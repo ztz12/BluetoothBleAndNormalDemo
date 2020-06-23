@@ -24,7 +24,7 @@ import android.widget.TextView;
 import java.util.Arrays;
 import java.util.UUID;
 
-import win.lioil.bluetooth.APP;
+import win.lioil.bluetooth.app.APP;
 import win.lioil.bluetooth.R;
 import win.lioil.bluetooth.util.AssistStatic;
 

@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import java.io.File;
 
-import win.lioil.bluetooth.APP;
+import win.lioil.bluetooth.app.APP;
 import win.lioil.bluetooth.R;
 
 public class BtServerActivity extends Activity implements BtBase.Listener {

@@ -1,4 +1,4 @@
-package win.lioil.bluetooth;
+package win.lioil.bluetooth.ui;
 
 import android.Manifest;
 import android.app.Activity;
@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 
+import win.lioil.bluetooth.app.APP;
+import win.lioil.bluetooth.R;
 import win.lioil.bluetooth.ble.BleClientActivity;
 import win.lioil.bluetooth.ble.BleServerActivity;
 import win.lioil.bluetooth.bt.BtClientActivity;

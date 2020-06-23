@@ -1,4 +1,4 @@
-package win.lioil.bluetooth;
+package win.lioil.bluetooth.app;
 
 import android.annotation.SuppressLint;
 import android.app.Application;

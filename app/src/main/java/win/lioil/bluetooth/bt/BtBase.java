@@ -11,7 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.UUID;
 
-import win.lioil.bluetooth.APP;
+import win.lioil.bluetooth.app.APP;
 import win.lioil.bluetooth.util.Util;
 
 /**

@@ -13,7 +13,7 @@
         android:required="false" />
 
     <application
-        android:name=".APP"
+        android:name=".app.APP"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:icon="@drawable/ico_ble"
@@ -22,11 +22,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".ui.BrushViewActivityActivity"
+            android:screenOrientation="portrait">
+        </activity>
         <activity
             android:name=".ble.BleClientDetailActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

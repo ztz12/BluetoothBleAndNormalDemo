@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 
-import win.lioil.bluetooth.APP;
+import win.lioil.bluetooth.app.APP;
 import win.lioil.bluetooth.R;
 import win.lioil.bluetooth.util.Utils;
 

@@ -12,9 +12,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.File;
-import java.io.IOException;
 
-import win.lioil.bluetooth.APP;
+import win.lioil.bluetooth.app.APP;
 import win.lioil.bluetooth.R;
 import win.lioil.bluetooth.util.BluetoothUtil;
 import win.lioil.bluetooth.util.BtReceiver;

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.BrushViewActivityActivity">
+
+    <win.lioil.bluetooth.widget.BrushView
+        android:id="@+id/brushView"
+        android:layout_width="match_parent"
+        android:layout_height="300dp" />
+
+    <ImageView
+        android:id="@+id/ivBitmap"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/selector_get_verification_btn"
+        android:text="保存绘制内容" />
+
+    <Button
+        android:id="@+id/btnLoadBitmap"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/selector_get_verification_btn"
+        android:text="加载图片" />
+
+    <Button
+        android:id="@+id/btnRenew"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/selector_get_verification_btn"
+        android:text="重新绘制" />
+
+</LinearLayout>

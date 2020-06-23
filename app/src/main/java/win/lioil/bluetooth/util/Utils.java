@@ -560,7 +560,17 @@ public class Utils {
 
     /**
      * 判断 CPU Endian 是否为 Little
-     *
+     * ByteOrder 定义了写入buffer时候的字节顺序
+     * 使用BIG_ENDIAN，则会在buffer保存和读取数据时都使用大端字节，
+     * 如果使用LITTLE_ENDIAN，则会在保存和读取时都使用小端字节，保存和读取使用的字节顺序总是相同的。
+     * java默认是big-endian 大端字节顺序
+     * API
+     * ---2个内置的ByteOrder
+     * ByteOrder.BIG_ENDIAN和ByteOrder.LITTLE_ENDIAN
+     * ---ByteOrder.nativeOrder()
+     * 返回本地jvm运行的硬件的字节顺序.使用和硬件一致的字节顺序可能使buffer更加有效.
+     * ---ByteOrder.toString()
+     * 返回ByteOrder的名字,BIG_ENDIAN或LITTLE_ENDIAN（小端字节顺序，保存与读取字节顺序总是相同）
      * @return 判断结果
      */
     private static boolean isLittleEndian() {
