@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -274,10 +275,28 @@ public class BleClientDetailActivity extends AppCompatActivity {
     // BLE中心设备连接外围设备的数量有限(大概2~7个)，在建立新连接之前必须释放旧连接资源，否则容易出现连接错误133
     private void closeConn() {
         if (mBluetoothGatt != null) {
+            refreshGattCache(mBluetoothGatt);
             mBluetoothGatt.disconnect();
             mBluetoothGatt.close();
             mBluetoothGatt = null;
         }
+    }
+
+
+    public static boolean refreshGattCache(BluetoothGatt gatt) {
+        boolean result = false;
+        try {
+            if (gatt != null) {
+                Method refresh = BluetoothGatt.class.getMethod("refresh");
+                if (refresh != null) {
+                    refresh.setAccessible(true);
+                    result = (boolean) refresh.invoke(gatt, new Object[0]);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
 

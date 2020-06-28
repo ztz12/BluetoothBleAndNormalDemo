@@ -10,8 +10,10 @@ import android.bluetooth.le.ScanSettings;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,8 @@ import java.util.List;
 import java.util.Objects;
 
 import win.lioil.bluetooth.R;
+import win.lioil.bluetooth.bean.BleDev;
+import win.lioil.bluetooth.util.Util;
 import win.lioil.bluetooth.util.Utils;
 
 public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
@@ -35,9 +39,26 @@ public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
     private final ScanCallback mScanCallback = new ScanCallback() {// 扫描Callback
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            BleDev dev = new BleDev(result.getDevice(), result);
-            if (!mDevices.contains(dev)) {
-                mDevices.add(dev);
+            if (mDevices.size() > 0) {
+                for (int i = 0; i < mDevices.size(); i++) {
+                    BleDev rssiDevice = mDevices.get(i);
+                    if (TextUtils.equals(rssiDevice.getDev().getAddress(), result.getDevice().getAddress())) {
+                        if (rssiDevice.getRssi() != result.getRssi() && System.currentTimeMillis() - rssiDevice.getRssiUpdateTime() > 1000L) {
+                            rssiDevice.setRssiUpdateTime(System.currentTimeMillis());
+                            rssiDevice.setRssi(result.getRssi());
+                            notifyItemChanged(i);
+                        }
+                        return;
+                    }
+                }
+            }
+            BleDev bleDev = new BleDev();
+            bleDev.setDev(result.getDevice());
+            bleDev.setRssi(result.getRssi());
+            bleDev.setRssiUpdateTime(SystemClock.currentThreadTimeMillis());
+            bleDev.setScanResult(result);
+            if (!mDevices.contains(bleDev)) {
+                mDevices.add(bleDev);
                 notifyDataSetChanged();
                 Log.i(TAG, "onScanResult: " + result); // result.getScanRecord() 获取BLE广播数据
             }
@@ -47,9 +68,26 @@ public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
     private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            BleDev dev = new BleDev(device, null);
+            if (mDevices.size() > 0) {
+                for (int i = 0; i < mDevices.size(); i++) {
+                    BleDev rssiDevice = mDevices.get(i);
+                    if (TextUtils.equals(rssiDevice.getDev().getAddress(), device.getAddress())) {
+                        if (rssiDevice.getRssi() != rssi && System.currentTimeMillis() - rssiDevice.getRssiUpdateTime() > 1000L) {
+                            rssiDevice.setRssiUpdateTime(System.currentTimeMillis());
+                            rssiDevice.setRssi(rssi);
+                            notifyItemChanged(i);
+                        }
+                        return;
+                    }
+                }
+            }
+            BleDev bleDev = new BleDev();
+            bleDev.setDev(device);
+            bleDev.setRssi(rssi);
+            bleDev.setRssiUpdateTime(SystemClock.currentThreadTimeMillis());
+            bleDev.setScanResult(null);
             if (!mDevices.contains(device)) {
-                mDevices.add(dev);
+                mDevices.add(bleDev);
                 //在Android 5.0以下 可以通过rssi获取蓝牙设备距离手机的距离
 //                Utils.getDistance(rssi);
                 notifyDataSetChanged();
@@ -77,7 +115,7 @@ public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         final BluetoothLeScanner bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-            if(mListener!=null){
+            if (mListener != null) {
                 mListener.onScanning();
             }
 //            final ScanSettings scanSettings = new ScanSettings.Builder()
@@ -101,7 +139,7 @@ public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
                         public void run() {
                             bluetoothLeScanner.stopScan(mScanCallback); //停止扫描
                             isScanning = false;
-                            if(mListener!=null){
+                            if (mListener != null) {
                                 mListener.onScannSuccess();
                             }
                         }
@@ -109,7 +147,7 @@ public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
                 }
             }, 0);
         } else {
-            if(mListener!=null){
+            if (mListener != null) {
                 mListener.onScanning();
             }
             mBluetoothAdapter.startLeScan(leScanCallback); //开始搜索
@@ -118,7 +156,7 @@ public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
                 public void run() {
                     mBluetoothAdapter.stopLeScan(leScanCallback);
                     isScanning = false;
-                    if(mListener!=null){
+                    if (mListener != null) {
                         mListener.onScannSuccess();
                     }
                 }
@@ -136,15 +174,22 @@ public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull final VH holder, int position) {
         BleDev dev = mDevices.get(position);
-        String name = dev.dev.getName();
-        String address = dev.dev.getAddress();
+        String name = dev.getDev().getName();
+        String address = dev.getDev().getAddress();
         StringBuilder sb = new StringBuilder();
         sb.append("设备名称：");
         sb.append(name);
         sb.append("\n设备地址：");
         sb.append(address);
+        sb.append("\n信号：");
+        sb.append(dev.getRssi());
+//        sb.append("\n距离：");
+//        sb.append(Math.round(Utils.getDistance(dev.getRssi())));
+//        sb.append(" m");
         holder.name.setText(sb.toString());
-        holder.address.setText(String.format("广播数据{%s}", dev.scanResult.getScanRecord()));
+        if (dev.getScanResult() != null) {
+            holder.address.setText(String.format("广播数据{%s}", dev.getScanResult().getScanRecord()));
+        }
     }
 
     @Override
@@ -168,36 +213,16 @@ public class BleDevAdapter extends RecyclerView.Adapter<BleDevAdapter.VH> {
             int pos = getAdapterPosition();
             Log.d(TAG, "onClick, getAdapterPosition=" + pos);
             if (pos >= 0 && pos < mDevices.size())
-                mListener.onItemClick(mDevices.get(pos).dev);
+                mListener.onItemClick(mDevices.get(pos).getDev());
         }
     }
 
     public interface Listener {
         void onItemClick(BluetoothDevice dev);
+
         void onScanning();
+
         void onScannSuccess();
     }
 
-    public static class BleDev {
-        public BluetoothDevice dev;
-        ScanResult scanResult;
-
-        BleDev(BluetoothDevice device, ScanResult result) {
-            dev = device;
-            scanResult = result;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            BleDev bleDev = (BleDev) o;
-            return Objects.equals(dev, bleDev.dev);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(dev);
-        }
-    }
 }

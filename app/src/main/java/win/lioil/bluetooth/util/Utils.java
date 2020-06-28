@@ -571,6 +571,7 @@ public class Utils {
      * 返回本地jvm运行的硬件的字节顺序.使用和硬件一致的字节顺序可能使buffer更加有效.
      * ---ByteOrder.toString()
      * 返回ByteOrder的名字,BIG_ENDIAN或LITTLE_ENDIAN（小端字节顺序，保存与读取字节顺序总是相同）
+     *
      * @return 判断结果
      */
     private static boolean isLittleEndian() {
