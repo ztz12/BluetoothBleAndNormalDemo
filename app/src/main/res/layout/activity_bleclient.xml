@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,16 +12,27 @@
         android:id="@+id/btn_scan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="reScan"
-        android:text="@string/reScan"
         android:layout_margin="5dp"
-        android:background="@drawable/selector_get_verification_btn"/>
+        android:background="@drawable/selector_get_verification_btn"
+        android:onClick="reScan"
+        android:text="@string/reScan" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_ble"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/btn_scan"
         android:background="@drawable/stroke"
-        android:padding="4dp"/>
+        android:padding="4dp" />
 
-</LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/float_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="40dp"
+        android:src="@drawable/ic_bluetooth_audio_black_24dp" />
+
+</RelativeLayout>

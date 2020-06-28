@@ -1,5 +1,7 @@
 package win.lioil.bluetooth.ble;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -8,9 +10,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 
 import win.lioil.bluetooth.app.APP;
 import win.lioil.bluetooth.R;
@@ -31,12 +35,15 @@ public class BleClientActivity extends Activity {
     private static final String TAG = BleClientActivity.class.getSimpleName();
     private BleDevAdapter mBleDevAdapter;
     private BluetoothAdapter mBluetoothAdapter;
+    private ObjectAnimator animator;
+    private FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bleclient);
         RecyclerView rv = findViewById(R.id.rv_ble);
+        floatingActionButton = findViewById(R.id.float_button);
         rv.setLayoutManager(new LinearLayoutManager(this));
         initBlueTooth();
         mBleDevAdapter = new BleDevAdapter(mBluetoothAdapter, new BleDevAdapter.Listener() {
@@ -50,11 +57,13 @@ public class BleClientActivity extends Activity {
             @Override
             public void onScanning() {
                 AssistStatic.showToast(BleClientActivity.this, "扫描中");
+                startBannerLoadingAnim();
             }
 
             @Override
             public void onScannSuccess() {
                 AssistStatic.showToast(BleClientActivity.this, "扫描完成");
+                stopBannerLoadingAnim();
             }
         });
         rv.setAdapter(mBleDevAdapter);
@@ -83,5 +92,20 @@ public class BleClientActivity extends Activity {
         } else {
             mBleDevAdapter.reScan();
         }
+    }
+
+    public void startBannerLoadingAnim() {
+        floatingActionButton.setImageResource(R.drawable.ic_loading);
+        animator = ObjectAnimator.ofFloat(floatingActionButton, "rotation", 0, 360);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.setDuration(800);
+        animator.setInterpolator(new LinearInterpolator());
+        animator.start();
+    }
+
+    public void stopBannerLoadingAnim() {
+        floatingActionButton.setImageResource(R.drawable.ic_bluetooth_audio_black_24dp);
+        animator.cancel();
+        floatingActionButton.setRotation(0);
     }
 }
