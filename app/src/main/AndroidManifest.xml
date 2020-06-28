@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="win.lioil.bluetooth">
+    package="win.lioil.bluetooth" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- 建立蓝牙连接和传输权限 -->
@@ -21,16 +21,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.BrushViewActivityActivity"
-            android:screenOrientation="portrait">
+        tools:ignore="GoogleAppIndexingWarning" >
+        <activity android:name=".ui.BaseActivity" >
+        </activity>
+        <activity
+            android:name=".ui.BrushViewActivityActivity"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".ble.BleClientDetailActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.MainActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
