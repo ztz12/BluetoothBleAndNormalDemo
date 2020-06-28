@@ -24,7 +24,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     private List<String> permissions = new ArrayList<>();
     private int mPermissionRequestCount = 0;
     private int MAX_NUMBER_REQUEST_PERMISSIONS = 4;
-    private boolean isOpen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,13 +73,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_PERMISSION_ACCESS_LOCATION: {
                 if (LocalUtils.checkGPSIsOpen(this)) {
-                    if (checkAllPermission() || isOpen) {
-                        isOpen = true;
+                    if (checkAllPermission()) {
                         if (permissionUseInterface != null) {
                             permissionUseInterface.onPermissionUse();
                         }
                     } else {
-                        showSettingDialog();
+//                        showSettingDialog();
                     }
                 } else {
                     LocalUtils.goToOpenGPS(this);
